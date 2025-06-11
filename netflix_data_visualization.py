@@ -1,91 +1,73 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-#load data
-df = pd.read_csv('netflix_titles.csv')
 
-#clean data
-df = df.dropna(subset=['type','release_year','rating','country','duration'])
+# Title
+st.title("📊 Netflix Data Visualization")
+
+# Load the CSV
+df = pd.read_csv("netflix_titles.csv")
+
+# Clean data
+df = df.dropna(subset=['type', 'release_year', 'rating', 'country', 'duration'])
+
+# Type count (Movies vs TV Shows)
+st.subheader("1. Number of Movies vs TV Shows on Netflix")
 type_counts = df['type'].value_counts()
-plt.figure(figsize=(6,4))
-plt.bar(type_counts.index,type_counts.values,color=['skyblue','orange'])
-plt.title('Number of Movies  VS TV Shows on Netflix')
-plt.xlabel('Type')
-plt.ylabel('Count')
-plt.tight_layout()
-plt.savefig('movies_vs_tvshows.png')
-plt.show()
+fig1, ax1 = plt.subplots()
+ax1.bar(type_counts.index, type_counts.values, color=['skyblue', 'orange'])
+ax1.set_title('Number of Movies vs TV Shows')
+ax1.set_xlabel('Type')
+ax1.set_ylabel('Count')
+st.pyplot(fig1)
 
+# Content Ratings
+st.subheader("2. Percentage of Content Ratings")
 rating_counts = df['rating'].value_counts()
-plt.figure(figsize = (8,6))
-plt.pie(rating_counts,labels=rating_counts.index,autopct= '%1.1f%%',startangle=90)
-plt.title('Percentage of Content Ratings')
-plt.tight_layout()
-plt.savefig('content_Ratings_pie.png')
-plt.show()
+fig2, ax2 = plt.subplots()
+ax2.pie(rating_counts, labels=rating_counts.index, autopct='%1.1f%%', startangle=90)
+ax2.set_title('Content Ratings')
+st.pyplot(fig2)
 
+# Movie durations
+st.subheader("3. Movie Duration Distribution")
 movie_df = df[df['type'] == 'Movie'].copy()
-movie_df['duration_int'] = movie_df['duration'].str.replace('min','').astype(int)
+movie_df['duration_int'] = movie_df['duration'].str.replace('min', '').astype(int)
+fig3, ax3 = plt.subplots()
+ax3.hist(movie_df['duration_int'], bins=30, color='seagreen', edgecolor='black')
+ax3.set_title('Movie Duration Distribution')
+ax3.set_xlabel('Duration (minutes)')
+ax3.set_ylabel('Number of Movies')
+st.pyplot(fig3)
 
-plt.figure(figsize=(8,6))
-plt.hist(movie_df['duration_int'], bins=30,color = 'seagreen',edgecolor='black')
-plt.title('Distribution of Movie Duration')
-plt.xlabel('Duration (minutes)')
-plt.ylabel('Number of Movies')
-plt.tight_layout()
-plt.savefig('movies_Duration_histogram.png')
-plt.show()
-
+# Release year vs show count
+st.subheader("4. Release Year vs Number of Shows")
 release_counts = df['release_year'].value_counts().sort_index()
-plt.figure(figsize=(10,6))
-plt.scatter(release_counts.index,release_counts.values,color='red')
-plt.title('Release Year VS Number of Shows')
-plt.xlabel('Release Year)')
-plt.ylabel('Number of Shows')
-plt.tight_layout()
-plt.savefig('release_year_Scatter.png')
-plt.show()
+fig4, ax4 = plt.subplots()
+ax4.scatter(release_counts.index, release_counts.values, color='red')
+ax4.set_title('Release Year vs Number of Shows')
+ax4.set_xlabel('Release Year')
+ax4.set_ylabel('Number of Shows')
+st.pyplot(fig4)
 
-
+# Top 10 countries
+st.subheader("5. Top 10 Countries by Number of Shows")
 country_counts = df['country'].value_counts().head(10)
+fig5, ax5 = plt.subplots()
+ax5.barh(country_counts.index, country_counts.values, color='teal')
+ax5.set_title('Top 10 Countries')
+ax5.set_xlabel('Number of Shows')
+ax5.set_ylabel('Country')
+st.pyplot(fig5)
 
-plt.figure(figsize=(8,6))
-plt.barh(country_counts.index, country_counts.values, color='teal')
-plt.title('Top 10 Countries VS Number of Shows')
-plt.xlabel('Number of shows')
-plt.ylabel('Country')
-plt.tight_layout()
-plt.savefig('top10_countries.png')
-plt.show()
-
-
+# Movies vs TV Shows Over the Years
+st.subheader("6. Movies vs TV Shows Released Over Years")
 content_by_year = df.groupby(['release_year', 'type']).size().unstack().fillna(0)
-fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-
-#first subplot : Movie
-ax[0].plot(content_by_year.index, content_by_year['Movie'], color='blue')
-ax[0].set_title('Movies Released Per Year')
-ax[0].set_xlabel('Year')
-ax[0].set_ylabel('Number of Movies')
-
-# Second subplot: TV Shows
-ax[0].plot(content_by_year.index, content_by_year['TV Show'], color='yellow')
-ax[0].set_title('TV Shows Released Per Year')
-ax[0].set_xlabel('Year')
-ax[0].set_ylabel('Number of TV Shows')
-
-# Main title
-fig.suptitle('Comparison of Movies and TV Shows Released Over Years')
-plt.tight_layout()
-plt.savefig('movies_tv_shows_comparison.png')
-plt.show()
-
-
-
-
-
+fig6, ax6 = plt.subplots()
+ax6.plot(content_by_year.index, content_by_year['Movie'], color='blue', label='Movies')
+ax6.plot(content_by_year.index, content_by_year['TV Show'], color='gold', label='TV Shows')
+ax6.set_title('Movies and TV Shows Over the Years')
+ax6.set_xlabel('Year')
+ax6.set_ylabel('Count')
+ax6.legend()
+st.pyplot(fig6)
